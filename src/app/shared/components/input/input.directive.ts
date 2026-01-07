@@ -1,4 +1,13 @@
-import { computed, Directive, effect, ElementRef, inject, input, linkedSignal, model } from '@angular/core';
+import {
+  computed,
+  Directive,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  linkedSignal,
+  model,
+} from '@angular/core';
 
 import type { ClassValue } from 'clsx';
 
@@ -38,8 +47,8 @@ export class ZardInputDirective {
         zStatus: this.zStatus(),
         zBorderless: this.zBorderless(),
       }),
-      this.class(),
-    ),
+      this.class()
+    )
   );
 
   constructor() {

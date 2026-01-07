@@ -1,0 +1,91 @@
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="max-w-sm space-y-6">
+  <z-form-field>
+    <label z-form-label zRequired>Name</label>
+    <z-form-control>
+      <input
+        z-input
+        type="text"
+        placeholder="Your full name"
+        formControlName="name"
+        [zStatus]="isInvalid('name') ? 'error' : undefined"
+      />
+    </z-form-control>
+    @if (hasError('name', 'required')) {
+    <z-form-message zType="error">Name is required.</z-form-message>
+    } @else if (hasError('name', 'minlength')) {
+    <z-form-message zType="error">Name must be at least 3 characters long.</z-form-message>
+    } @else if (hasError('name', 'maxlength')) {
+    <z-form-message zType="error">Name must be at most 10 characters long.</z-form-message>
+    } @else {
+    <z-form-message>Enter your full name.</z-form-message>
+    }
+  </z-form-field>
+
+  <z-form-field>
+    <label z-form-label zRequired>Surname</label>
+    <z-form-control>
+      <input
+        z-input
+        type="text"
+        placeholder="Your surname"
+        formControlName="surname"
+        [zStatus]="isInvalid('surname') ? 'error' : undefined"
+      />
+    </z-form-control>
+    @if (hasError('surname', 'required')) {
+    <z-form-message zType="error">Surname is required.</z-form-message>
+    } @else if (hasError('surname', 'minlength')) {
+    <z-form-message zType="error">Surname must be at least 2 characters long.</z-form-message>
+    } @else if (hasError('surname', 'maxlength')) {
+    <z-form-message zType="error">Surname must be at most 10 characters long.</z-form-message>
+    } @else {
+    <z-form-message>Enter your surname.</z-form-message>
+    }
+  </z-form-field>
+
+  <z-form-field>
+    <label z-form-label zRequired>Email</label>
+    <z-form-control>
+      <input
+        z-input
+        type="email"
+        placeholder="your.email@example.com"
+        formControlName="email"
+        [zStatus]="isInvalid('email') ? 'error' : undefined"
+      />
+    </z-form-control>
+    @if (hasError('email', 'required')) {
+    <z-form-message zType="error">Email is required.</z-form-message>
+    } @else if (hasError('email', 'email')) {
+    <z-form-message zType="error">Please enter a valid email address.</z-form-message>
+    } @else {
+    <z-form-message>We'll never share your email.</z-form-message>
+    }
+  </z-form-field>
+
+  <z-form-field>
+    <label z-form-label zRequired>Password</label>
+    <z-form-control>
+      <input
+        z-input
+        type="password"
+        placeholder="********"
+        formControlName="password"
+        [zStatus]="isInvalid('password') ? 'error' : undefined"
+      />
+    </z-form-control>
+    @if (hasError('password', 'required')) {
+    <z-form-message zType="error">Password is required.</z-form-message>
+    } @else if (hasError('password', 'minlength')) {
+    <z-form-message zType="error">Password must be at least 8 characters long.</z-form-message>
+    } @else if (hasError('password', 'maxlength')) {
+    <z-form-message zType="error">Password must be at most 16 characters long.</z-form-message>
+    } @else {
+    <z-form-message>Enter your password.</z-form-message>
+    }
+  </z-form-field>
+
+  <div class="flex gap-2">
+    <button z-button zType="default" type="submit" [zDisabled]="profileForm.invalid">Submit</button>
+  </div>
+</form>
