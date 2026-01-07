@@ -1,0 +1,5 @@
+@reference "../../styles.css";
+
+.sidebar-item {
+  @apply hover:bg-neutral-200 transition-all duration-100 rounded-md p-1.5 cursor-pointer flex items-center gap-2;
+}

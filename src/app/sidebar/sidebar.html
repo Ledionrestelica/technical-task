@@ -1,0 +1,33 @@
+<aside class="w-64 bg-[#fafafa] h-screen py-5 px-3">
+  <div
+    class="hover:bg-neutral-200 rounded-md p-2 cursor-pointer flex items-center gap-2 transition-all duration-100"
+  >
+    <div class="bg-black rounded-md p-2">
+      <lucide-angular [img]="commandIcon" class="w-4 h-4" color="white"></lucide-angular>
+    </div>
+    <div class="flex flex-col">
+      <p class="leading-4">Acme Inc.</p>
+      <p class="text-sm text-stone-500">acmeinc.com</p>
+    </div>
+  </div>
+  <div class="text-xs font-medium text-neutral-500 mt-10 mb-2">DASHBOARD</div>
+  <div class="flex flex-col gap-1">
+    <a
+      routerLink="/"
+      routerLinkActive="bg-neutral-200"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="sidebar-item"
+    >
+      <lucide-angular [img]="houseIcon" class="w-4 h-4"></lucide-angular>
+      Home
+    </a>
+    <a routerLink="/coverage-codes" routerLinkActive="bg-neutral-200" class="sidebar-item">
+      <lucide-angular [img]="fileTextIcon" class="w-4 h-4"></lucide-angular>
+      Medical Coverage Codes
+    </a>
+    <a routerLink="/medical-plans" routerLinkActive="bg-neutral-200" class="sidebar-item">
+      <lucide-angular [img]="clipboardListIcon" class="w-4 h-4"></lucide-angular>
+      Medical Plans
+    </a>
+  </div>
+</aside>
