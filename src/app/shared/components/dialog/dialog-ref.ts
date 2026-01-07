@@ -21,7 +21,7 @@ export class ZardDialogRef<T = any, R = any, U = any> {
     private overlayRef: OverlayRef,
     private config: ZardDialogOptions<T, U>,
     private containerInstance: ZardDialogComponent<T, U>,
-    @Inject(PLATFORM_ID) private platformId: object,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {
     this.containerInstance.cancelTriggered.subscribe(() => this.trigger(eTriggerAction.CANCEL));
     this.containerInstance.okTriggered.subscribe(() => this.trigger(eTriggerAction.OK));
@@ -36,8 +36,8 @@ export class ZardDialogRef<T = any, R = any, U = any> {
     if (isPlatformBrowser(this.platformId)) {
       fromEvent<KeyboardEvent>(document, 'keydown')
         .pipe(
-          filter(event => event.key === 'Escape'),
-          takeUntil(this.destroy$),
+          filter((event) => event.key === 'Escape'),
+          takeUntil(this.destroy$)
         )
         .subscribe(() => this.close());
     }

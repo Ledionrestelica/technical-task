@@ -16,7 +16,13 @@
     >
       Description
     </label>
-    <textarea cols="30" rows="3" z-input formControlName="description"></textarea>
+    <textarea
+      cols="30"
+      rows="3"
+      z-input
+      formControlName="description"
+      [zStatus]="isInvalid('description') ? 'error' : undefined"
+    ></textarea>
   </div>
 
   <div class="grid gap-3">

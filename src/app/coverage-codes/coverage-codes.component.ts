@@ -4,7 +4,6 @@ import { LocalStorageService } from '../shared/services/local-storage.service';
 import { CoverageCode } from '@/shared/models/coverage-code.model';
 import { signal } from '@angular/core';
 import { LucideAngularModule, CircleCheck, CircleX, LoaderCircle } from 'lucide-angular';
-import { ZardButtonComponent } from '@/shared/components/button/button.component';
 import { AddCoverageCodeDialogComponent } from '../add-coverage-code/add-coverage-code';
 
 @Component({
@@ -12,7 +11,6 @@ import { AddCoverageCodeDialogComponent } from '../add-coverage-code/add-coverag
   imports: [
     ZardTableComponent,
     LucideAngularModule,
-    ZardButtonComponent,
     AddCoverageCodeDialogComponent,
   ],
   templateUrl: './coverage-codes.html',
@@ -29,9 +27,18 @@ export class CoverageCodesComponent {
   readonly isLoading = signal<boolean>(true);
 
   constructor(private readonly localStorageService: LocalStorageService) {
+    this.loadCoverageCodes();
+  }
+
+  loadCoverageCodes(): void {
+    this.isLoading.set(true);
     this.localStorageService.getItem('coverage_codes').then((coverageCodes) => {
       this.coverageCodes.set(coverageCodes ?? []);
       this.isLoading.set(false);
     });
+  }
+
+  onSaved(): void {
+    this.loadCoverageCodes();
   }
 }

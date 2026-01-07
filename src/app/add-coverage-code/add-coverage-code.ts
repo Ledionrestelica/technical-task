@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal, OnInit, inject, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -7,24 +7,18 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { ChangeDetectionStrategy, inject, type AfterViewInit } from '@angular/core';
-
-import { ZardButtonComponent } from '@/shared/components/button/button.component';
 import { ZardInputDirective } from '@/shared/components/input/input.directive';
 import { ZardDialogModule } from '@/shared/components/dialog/dialog.component';
 import { Z_MODAL_DATA, ZardDialogService } from '@/shared/components/dialog/dialog.service';
 import { CoverageCode } from '@/shared/models/coverage-code.model';
 import { ZardCheckboxComponent } from '@/shared/components/checkbox/checkbox.component';
-
-interface iDialogData {
-  name: string;
-  username: string;
-}
+import { LocalStorageService } from '@/shared/services/local-storage.service';
+import { toast } from 'ngx-sonner';
+import { ZardButtonComponent } from '@/shared/components/button/button.component';
 
 @Component({
   selector: 'app-add-coverage-code',
   imports: [
-    ZardButtonComponent,
     ZardInputDirective,
     ZardCheckboxComponent,
     ZardDialogModule,
@@ -36,8 +30,8 @@ interface iDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class AddCoverageCode {
-  private zData: CoverageCode = inject(Z_MODAL_DATA);
+export class AddCoverageCode implements OnInit {
+  private zData: CoverageCode | null = inject(Z_MODAL_DATA);
 
   form = new FormGroup({
     code: new FormControl('', [
@@ -45,13 +39,21 @@ export class AddCoverageCode {
       Validators.minLength(1),
       Validators.maxLength(4),
     ]),
-    description: new FormControl('', [Validators.required, Validators.minLength(1)]),
+    description: new FormControl('', [
+      Validators.required,
+      Validators.minLength(1),
+      Validators.maxLength(30),
+    ]),
     active: new FormControl(false),
   });
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     if (this.zData) {
-      this.form.patchValue(this.zData);
+      this.form.patchValue({
+        code: this.zData.code,
+        description: this.zData.description,
+        active: this.zData.active,
+      });
     }
   }
 
@@ -77,6 +79,11 @@ export class AddCoverageCode {
 })
 export class AddCoverageCodeDialogComponent {
   private dialogService = inject(ZardDialogService);
+  private localStorageService = inject(LocalStorageService);
+
+  @Output() saved = new EventEmitter<void>();
+
+  isSaving = signal<boolean>(false);
 
   openDialog() {
     this.dialogService.create({
@@ -89,8 +96,42 @@ export class AddCoverageCodeDialogComponent {
         active: true,
       } as CoverageCode,
       zOkText: 'Save changes',
-      zOnOk: (instance) => {
-        console.log('Form submitted:', instance.form.value);
+      zOnOk: async (instance: AddCoverageCode) => {
+        if (instance.form.invalid) {
+          instance.form.markAllAsTouched();
+          return false;
+        }
+
+        if (this.isSaving()) {
+          return false;
+        }
+
+        this.isSaving.set(true);
+        try {
+          const formValue = instance.form.value;
+
+          const newCode: CoverageCode = {
+            id: crypto.randomUUID(),
+            code: formValue.code ?? '',
+            description: formValue.description ?? '',
+            active: formValue.active ?? false,
+          };
+
+          const response = await this.localStorageService.setItem('coverage_codes', [newCode]);
+
+          if (response.status === 'success') {
+            toast.success(response.message);
+            this.saved.emit();
+          } else {
+            toast.error(response.message);
+          }
+          return true;
+        } catch (error) {
+          console.error(error);
+          return false;
+        } finally {
+          this.isSaving.set(false);
+        }
       },
       zWidth: '425px',
     });
