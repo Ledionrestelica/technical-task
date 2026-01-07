@@ -9,13 +9,7 @@ import { ZardFormImports } from './shared/components/form/form.imports';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    ZardInputDirective,
-    ReactiveFormsModule,
-    ZardButtonComponent,
-    ZardFormImports,
-  ],
+  imports: [ZardInputDirective, ReactiveFormsModule, ZardButtonComponent, ZardFormImports],
   templateUrl: './app.html',
   standalone: true,
   styleUrl: './app.css',
