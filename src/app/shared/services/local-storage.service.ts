@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { CoverageCode } from '../models/coverage-code.model';
 import { ApiResponse } from '../models/api-response.model';
 
+//Added a small delay to stimulate real api response
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,14 +22,22 @@ export class LocalStorageService {
     return new Promise((resolve) => {
       setTimeout(() => {
         const existingData = JSON.parse(localStorage.getItem(key) ?? '[]');
-        const updatedData = [...existingData, ...value];
+        if (existingData.some((item: CoverageCode) => item.code === value[0].code)) {
+          return resolve({
+            status: 'error',
+            data: [],
+            message: 'Coverage code already exists',
+          });
+        } else {
+          const updatedData = [...existingData, ...value];
 
-        localStorage.setItem(key, JSON.stringify(updatedData));
-        resolve({
-          status: 'success',
-          data: updatedData,
-          message: 'Data set successfully',
-        });
+          localStorage.setItem(key, JSON.stringify(updatedData));
+          resolve({
+            status: 'success',
+            data: updatedData,
+            message: 'Data set successfully',
+          });
+        }
       }, 1500);
     });
   }

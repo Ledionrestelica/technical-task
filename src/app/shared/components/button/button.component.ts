@@ -29,7 +29,7 @@ import { mergeClasses } from '@/shared/utils/merge-classes';
   imports: [ZardIconComponent],
   template: `
     @if (zLoading()) {
-      <z-icon zType="loader-circle" class="animate-spin duration-2000" />
+    <z-icon zType="loader-circle" class="animate-spin duration-2000" />
     }
     <ng-content />
   `,
@@ -68,7 +68,7 @@ export class ZardButtonComponent implements OnDestroy {
         const el = this.elementRef.nativeElement;
         const hasIcon = el.querySelector('z-icon, [z-icon]') !== null;
         const children = Array.from<Node>(el.childNodes);
-        const hasText = children.some(node => {
+        const hasText = children.some((node) => {
           if (node.nodeType === 3) {
             return node.textContent?.trim() !== '';
           }
@@ -112,12 +112,11 @@ export class ZardButtonComponent implements OnDestroy {
         zLoading: this.zLoading(),
         zDisabled: this.zDisabled(),
       }),
-      this.class(),
-    ),
+      this.class()
+    )
   );
 
   protected readonly isNotInsideOfButtonOrLink = computed(() => {
-    // Evaluated once; assumes component parent doesn't change after mount
     const zardButtonElement = this.elementRef.nativeElement;
     if (zardButtonElement.parentElement) {
       const { tagName } = zardButtonElement.parentElement;
