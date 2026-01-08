@@ -62,7 +62,11 @@
             }
           </td>
         </tr>
-        } }
+        } } @if(coverageCodes().length === 0){
+        <tr>
+          <td colspan="3" class="text-center text-muted-foreground">No coverage codes found</td>
+        </tr>
+        }
       </tbody>
     </table>
   </div>
