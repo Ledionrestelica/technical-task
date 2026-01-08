@@ -1,0 +1,40 @@
+<form [formGroup]="form" class="grid gap-4">
+  <div class="grid gap-3">
+    <label for="code" class="custom-input"> Code </label>
+    <input
+      class="flex h-9 py-2 file:max-md:py-0 text-sm rounded-md border px-4 font-normal border-input bg-transparent file:border-0 file:text-foreground file:bg-transparent file:font-medium placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+      formControlName="code"
+    />
+  </div>
+
+  <div class="grid gap-3">
+    <label
+      for="description"
+      class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+    >
+      Description
+    </label>
+    <textarea
+      class="custom-textarea peer"
+      cols="30"
+      rows="3"
+      formControlName="description"
+    ></textarea>
+  </div>
+
+  <div class="grid gap-3">
+    <label
+      for="active"
+      class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+    >
+      Active
+    </label>
+    <div class="relative flex">
+      <input
+        class="h-4 w-4 rounded-sm border-2 border-black bg-white checked:bg-black checked:border-black checked:ring-0 focus:ring-0 focus:outline-none"
+        type="checkbox"
+        formControlName="active"
+      />
+    </div>
+  </div>
+</form>

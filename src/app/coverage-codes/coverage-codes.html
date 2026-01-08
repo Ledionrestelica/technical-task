@@ -13,6 +13,7 @@
           <th>Code</th>
           <th>Description</th>
           <th>Active</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -54,17 +55,32 @@
         <tr class="cursor-pointer">
           <td class="font-medium">{{ coverageCode.code }}</td>
           <td>{{ coverageCode.description }}</td>
-          <td class="flex items-center">
+          <td style="padding-left: 24px" class="">
             @if(coverageCode.active) {
-            <lucide-angular [img]="circleCheck" class="size-4 text-green-500" />
+            <div class="size-2 bg-green-500 rounded-full"></div>
             } @else {
-            <lucide-angular [img]="circleX" class="size-4 text-red-500" />
+            <div class="size-2 bg-red-500 rounded-full"></div>
+            }
+          </td>
+          <td style="padding-left: 13px" class="flex items-center gap-2">
+            @if(isDeleting(coverageCode.id)) {
+            <lucide-angular [img]="loader" class="size-4 animate-spin" />
+            } @else {
+            <lucide-angular
+              [img]="trash"
+              class="size-4 cursor-pointer"
+              (click)="deleteCoverageCode(coverageCode.id)"
+            />
+            <app-edit-coverage-code-dialog
+              [coverageCode]="coverageCode"
+              (saved)="onSaved()"
+            ></app-edit-coverage-code-dialog>
             }
           </td>
         </tr>
         } } @if(coverageCodes().length === 0 && !isLoading()){
         <tr>
-          <td colspan="3" class="text-center text-muted-foreground">No coverage codes found</td>
+          <td colspan="4" class="text-center text-muted-foreground">No coverage codes found</td>
         </tr>
         }
       </tbody>

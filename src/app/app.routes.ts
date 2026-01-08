@@ -1,8 +1,5 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './main-layout/main-layout';
-import { Home } from './home/home';
-import { CoverageCodesComponent } from './coverage-codes/coverage-codes.component';
-import { MedicalPlansComponent } from './medical-plans/medical-plans.component';
 
 export const routes: Routes = [
   {
@@ -11,15 +8,17 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: Home,
+        loadComponent: () => import('./home/home').then((m) => m.Home),
       },
       {
         path: 'coverage-codes',
-        component: CoverageCodesComponent,
+        loadComponent: () =>
+          import('./coverage-codes/coverage-codes.component').then((m) => m.CoverageCodesComponent),
       },
       {
         path: 'medical-plans',
-        component: MedicalPlansComponent,
+        loadComponent: () =>
+          import('./medical-plans/medical-plans.component').then((m) => m.MedicalPlansComponent),
       },
     ],
   },

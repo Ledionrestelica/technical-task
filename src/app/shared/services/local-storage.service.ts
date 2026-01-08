@@ -10,10 +10,15 @@ import { ApiResponse } from '../models/api-response.model';
 export class LocalStorageService {
   constructor() {}
 
-  getItem(key: 'coverage_codes' | 'medical_plans'): Promise<CoverageCode[] | null> {
-    return new Promise<CoverageCode[] | null>((resolve) => {
+  getItem(key: 'coverage_codes' | 'medical_plans'): Promise<ApiResponse<CoverageCode[] | null>> {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(JSON.parse(localStorage.getItem(key) ?? '[]'));
+        const data = JSON.parse(localStorage.getItem(key) ?? '[]');
+        resolve({
+          status: 'success',
+          data: data,
+          message: 'Data fetched successfully',
+        });
       }, 1000);
     });
   }
@@ -38,6 +43,30 @@ export class LocalStorageService {
             message: 'Data set successfully',
           });
         }
+      }, 1500);
+    });
+  }
+
+  deleteItem(key: 'coverage_codes', id: string): Promise<ApiResponse<CoverageCode[]>> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const existingData = JSON.parse(localStorage.getItem(key) ?? '[]');
+
+        if (!existingData.some((item: CoverageCode) => item.id === id)) {
+          return resolve({
+            status: 'error',
+            data: [],
+            message: 'Data not found',
+          });
+        }
+
+        const updatedData = existingData.filter((item: CoverageCode) => item.id !== id);
+        localStorage.setItem(key, JSON.stringify(updatedData));
+        resolve({
+          status: 'success',
+          data: updatedData,
+          message: 'Data deleted successfully',
+        });
       }, 1500);
     });
   }
