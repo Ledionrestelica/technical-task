@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ZardTableComponent } from '../shared/components/table/table.component';
-import { AddMedicalPlanDialogComponent } from '../add-medical-plan/add-medical-plan';
+import { AddMedicalPlanDialogComponent } from '../shared/components/add-medical-plan/add-medical-plan';
 import { LocalStorageService } from '../shared/services/local-storage.service';
 import {
   MedicalPlan,
