@@ -1,0 +1,277 @@
+<div class="w-full h-full gap-4 p-6 bg-white rounded-2xl border border-neutral-200 overflow-scroll">
+  @if (isLoading()) {
+  <div class="flex items-center justify-center p-8">
+    <p>Loading...</p>
+  </div>
+  } @else { @let plan = medicalPlan(); @if (plan) {
+  <div class="space-y-6">
+    <div class="pb-2 mb-4 border-b border-neutral-200 w-full flex items-center justify-between">
+      <h2 class="text-lg font-medium">Medical Plan Details</h2>
+      <button [zDisabled]="!form.dirty || form.invalid || isSaving()" (click)="save()" z-button>
+        @if (isSaving()) {
+        <span>Saving...</span>
+        } @else {
+        <span>Save</span>
+        }
+      </button>
+    </div>
+
+    <form [formGroup]="form" class="space-y-6">
+      <!-- Plan Details Section -->
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold">Plan Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label
+              for="code"
+              class="text-sm font-medium"
+              [class.text-muted-foreground]="isFormDisabled()"
+            >
+              Plan Code <span class="text-red-500">*</span>
+            </label>
+            <input
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+              [class.border-red-500]="form.get('code')?.invalid && form.get('code')?.touched"
+              formControlName="code"
+              id="code"
+              [disabled]="isFormDisabled()"
+              maxlength="4"
+            />
+            @if (form.get('code')?.invalid && form.get('code')?.touched) {
+            <span class="text-xs text-red-500">Plan Code is required (max 4 characters)</span>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              for="name"
+              class="text-sm font-medium"
+              [class.text-muted-foreground]="isFormDisabled()"
+            >
+              Plan Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+              [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
+              formControlName="name"
+              id="name"
+              [disabled]="isFormDisabled()"
+              maxlength="30"
+            />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <span class="text-xs text-red-500">Plan Name is required (max 30 characters)</span>
+            }
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label
+            for="active"
+            class="text-sm font-medium"
+            [class.text-muted-foreground]="isFormDisabled()"
+          >
+            Active Plan
+          </label>
+          <z-checkbox formControlName="active" id="active"></z-checkbox>
+        </div>
+      </div>
+
+      <!-- Coverage Configuration Section -->
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold">Coverage Configuration</h3>
+        <div class="border rounded-md p-4">
+          <div class="grid grid-cols-3 gap-4 mb-3 pb-2 border-b">
+            <div class="font-medium text-sm">Coverage Type</div>
+            <div class="font-medium text-sm text-center">Employee</div>
+            <div class="font-medium text-sm text-center">Dependent</div>
+          </div>
+          <div class="space-y-3">
+            @for ( config of coverageConfigurationFormArray.controls; track $index; let index =
+            $index ) { @let type = getCoverageConfigType(index);
+            <div
+              class="grid grid-cols-3 gap-4 items-center"
+              [class.opacity-50]="isCoverageConfigDisabled(type)"
+            >
+              <div class="text-sm">{{ type }}</div>
+              <div class="flex justify-center">
+                <z-checkbox
+                  [formControl]="getEmployeeControl(index)"
+                  [disabled]="isCoverageConfigDisabled(type) || isFormDisabled()"
+                ></z-checkbox>
+              </div>
+              <div class="flex justify-center">
+                <z-checkbox
+                  [formControl]="getDependentControl(index)"
+                  [disabled]="isCoverageConfigDisabled(type) || isFormDisabled()"
+                ></z-checkbox>
+              </div>
+            </div>
+            }
+          </div>
+          @if ( form.get('coverageConfiguration')?.invalid &&
+          form.get('coverageConfiguration')?.touched ) {
+          <span class="text-xs text-red-500 mt-2 block"
+            >Please select at least one coverage option</span
+          >
+          }
+        </div>
+        @if (hasSelfInsured()) {
+        <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+          Note: Self Insured coverage affects contribution calculations
+        </div>
+        }
+      </div>
+
+      <!-- Coverage Rates Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold">Coverage Rates</h3>
+          <button
+            type="button"
+            (click)="addCoverageRate()"
+            [disabled]="isFormDisabled()"
+            class="flex items-center gap-2 text-sm px-3 py-1 border rounded hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <lucide-angular [img]="plus" class="size-4" />
+            Add Rate
+          </button>
+        </div>
+
+        @if (coverageRatesFormArray.length === 0) {
+        <div class="text-sm text-muted-foreground p-4 border rounded-md text-center">
+          No coverage rates added. Click "Add Rate" to add one.
+        </div>
+        } @else {
+        <div class="border rounded-md overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-muted">
+              <tr>
+                <th class="text-left p-3 text-sm font-medium">Coverage Code</th>
+                <th class="text-left p-3 text-sm font-medium">Rate</th>
+                <th class="text-left p-3 text-sm font-medium">Projected Rate</th>
+                <th class="text-left p-3 text-sm font-medium">District Portion ($)</th>
+                <th class="text-left p-3 text-sm font-medium">District Portion (%)</th>
+                <th class="text-left p-3 text-sm font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for ( rateGroup of coverageRatesFormArray.controls; track $index; let index = $index
+              ) {
+              <tr class="border-t">
+                <td class="p-3">
+                  <z-select
+                    [formControl]="getCoverageCodeIdControl(index)"
+                    [disabled]="isFormDisabled()"
+                    zPlaceholder="Select Coverage Code"
+                  >
+                    @for (code of coverageCodes(); track code.id) {
+                    <z-select-item [zValue]="code.id"
+                      >{{ code.code }} - {{ code.description }}</z-select-item
+                    >
+                    }
+                  </z-select>
+                  @if ( getCoverageCodeIdControl(index).invalid &&
+                  getCoverageCodeIdControl(index).touched ) {
+                  <span class="text-xs text-red-500">
+                    @if (getCoverageCodeIdControl(index).hasError('required')) { Required } @else if
+                    (getCoverageCodeIdControl(index).hasError('duplicateCoverageCode')) { This
+                    coverage code is already used in another rate }
+                  </span>
+                  }
+                </td>
+                <td class="p-3">
+                  <input
+                    type="number"
+                    [formControl]="getRateControl(index)"
+                    [disabled]="isFormDisabled()"
+                    step="0.01"
+                    min="0"
+                    class="flex h-9 w-24 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                    [class.border-red-500]="
+                      getRateControl(index).invalid && getRateControl(index).touched
+                    "
+                  />
+                  @if (getRateControl(index).invalid && getRateControl(index).touched) {
+                  <span class="text-xs text-red-500">Required</span>
+                  }
+                </td>
+                <td class="p-3">
+                  <input
+                    type="number"
+                    [formControl]="getProjectedRateControl(index)"
+                    [disabled]="isFormDisabled()"
+                    step="0.01"
+                    min="0"
+                    class="flex h-9 w-24 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </td>
+                <td class="p-3">
+                  <input
+                    type="number"
+                    [formControl]="getDistrictPortionDollarControl(index)"
+                    [disabled]="isFormDisabled()"
+                    step="0.01"
+                    min="0"
+                    class="flex h-9 w-24 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </td>
+                <td class="p-3">
+                  <input
+                    type="number"
+                    [formControl]="getDistrictPortionPercentControl(index)"
+                    [disabled]="isFormDisabled()"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    class="flex h-9 w-24 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-normal placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </td>
+                <td class="p-3">
+                  <button
+                    type="button"
+                    (click)="removeCoverageRate(index)"
+                    [disabled]="isFormDisabled()"
+                    class="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <lucide-angular [img]="trash" class="size-4" />
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+
+      <!-- Plan Contribution Section -->
+      <div class="space-y-4">
+        <h3 class="text-base font-semibold">Plan Contribution</h3>
+        <div class="space-y-2">
+          @for (option of planContributionOptions; track option) {
+          <label
+            class="flex items-center gap-2 cursor-pointer"
+            [class.cursor-not-allowed]="isFormDisabled()"
+            [class.opacity-50]="isFormDisabled()"
+          >
+            <input
+              type="radio"
+              [value]="option"
+              formControlName="planContribution"
+              [disabled]="isFormDisabled()"
+              class="w-4 h-4"
+            />
+            <span class="text-sm">{{ option }}</span>
+          </label>
+          }
+        </div>
+        @if (form.get('planContribution')?.value === 'None') {
+        <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+          Note: Plans with "None" contribution are excluded from contribution calculations
+        </div>
+        }
+      </div>
+    </form>
+  </div>
+  } }
+</div>

@@ -1,4 +1,110 @@
-<div class="w-full h-full p-6 border border-neutral-200 rounded-lg bg-white">
-  <h1 class="text-3xl font-bold mb-4">Medical Plans</h1>
-  <p class="text-muted-foreground">Manage medical plans and their configurations.</p>
+<div class="w-full h-full p-6 border border-neutral-200 rounded-2xl bg-white overflow-scroll">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold mb-4">Medical Plans</h1>
+      <p class="text-muted-foreground">Manage medical plans and their configurations.</p>
+    </div>
+    <div>
+      <app-add-medical-plan-dialog (saved)="onSaved()"></app-add-medical-plan-dialog>
+    </div>
+  </div>
+  <div class="overflow-hidden rounded-md border mt-5">
+    <table z-table>
+      <thead class="bg-muted">
+        <tr>
+          <th>Plan Code</th>
+          <th>Plan Name</th>
+          <th>Active</th>
+          <th>Coverage Summary</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoading()){
+        <tr>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+          <td>
+            <div class="bg-neutral-200 rounded-md animate-pulse h-5"></div>
+          </td>
+        </tr>
+        } @else { @for (medicalPlan of medicalPlans(); track $index) {
+        <tr class="cursor-pointer">
+          <td class="font-medium">
+            <a class="underline" href="/medical-plans/{{ medicalPlan.id }}">{{
+              medicalPlan.code
+            }}</a>
+          </td>
+          <td>{{ medicalPlan.name }}</td>
+          <td style="padding-left: 24px" class="">
+            @if(medicalPlan.active) {
+            <div class="size-2 bg-green-500 rounded-full"></div>
+            } @else {
+            <div class="size-2 bg-red-500 rounded-full"></div>
+            }
+          </td>
+          <td>
+            @if(medicalPlan.coverageSummary.length > 1){
+            <span class="text-sm"
+              >{{ medicalPlan.coverageSummary[0] }} +
+              {{ medicalPlan.coverageSummary.length - 1 }}</span
+            >
+            } @else {
+            <span class="text-sm">{{ medicalPlan.coverageSummary.join(', ') }}</span>
+            }
+          </td>
+          <td style="padding-left: 13px" class="flex items-center gap-2">
+            @if(deletingId() === medicalPlan.id) {
+            <lucide-angular [img]="loader" class="size-4 animate-spin" />
+            } @else {
+            <lucide-angular
+              [img]="trash"
+              class="size-4 cursor-pointer"
+              (click)="deleteMedicalPlan(medicalPlan.id)"
+              title="Delete"
+            />
+            <lucide-angular
+              [img]="pencil"
+              class="size-4 cursor-pointer"
+              (click)="editMedicalPlan(medicalPlan.id)"
+              title="Edit"
+            />
+
+            }
+          </td>
+        </tr>
+        } } @if(medicalPlans().length === 0 && !isLoading()){
+        <tr>
+          <td colspan="4" class="text-center text-muted-foreground">No medical plans found</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>

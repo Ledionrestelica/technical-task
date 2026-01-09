@@ -32,8 +32,6 @@ import { ZardButtonComponent } from '@/shared/components/button/button.component
 import { ZardIconComponent } from '@/shared/components/icon/icon.component';
 import type { ZardIcon } from '@/shared/components/icon/icons';
 
-// Used by the NgModule provider definition
-
 export type OnClickCallback<T> = (instance: T) => false | void | object;
 export class ZardDialogOptions<T, U> {
   zCancelIcon?: ZardIcon;
@@ -46,7 +44,7 @@ export class ZardDialogOptions<T, U> {
   zHideFooter?: boolean;
   zMaskClosable?: boolean;
   zOkDestructive?: boolean;
-  zOkDisabled?: boolean;
+  zOkDisabled?: boolean | ((instance: T) => boolean);
   zOkIcon?: ZardIcon;
   zOkText?: string | null;
   zOnCancel?: EventEmitter<T> | OnClickCallback<T> = noopFn;
@@ -117,7 +115,7 @@ export class ZardDialogOptions<T, U> {
         data-testid="z-ok-button"
         z-button
         [zType]="config.zOkDestructive ? 'destructive' : 'default'"
-        [disabled]="config.zOkDisabled"
+        [zDisabled]="isOkDisabled()"
         (click)="onOkClick()"
       >
         @if (config.zOkIcon) {
@@ -173,6 +171,14 @@ export class ZardDialogComponent<T, U> extends BasePortalOutlet {
   dialogRef?: ZardDialogRef<T>;
 
   protected readonly isStringContent = typeof this.config.zContent === 'string';
+
+  protected readonly isOkDisabled = computed(() => {
+    const disabled = this.config.zOkDisabled;
+    if (typeof disabled === 'function' && this.dialogRef?.componentInstance) {
+      return disabled(this.dialogRef.componentInstance);
+    }
+    return disabled ?? false;
+  });
 
   readonly portalOutlet = viewChild.required(CdkPortalOutlet);
 

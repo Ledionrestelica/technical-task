@@ -13,7 +13,13 @@
       zTitle="Total Medical Coverage Codes"
       zDescription="Active coverage codes in the system"
     >
-      <div class="text-4xl font-bold">{{ totalCoverageCodes }}</div>
+      <div class="text-4xl font-bold">
+        @if (isLoading()) {
+        <span class="text-muted-foreground">...</span>
+        } @else {
+        {{ totalCoverageCodes() }}
+        }
+      </div>
       <button z-button class="w-full mt-4" routerLink="/coverage-codes">View Coverage Codes</button>
     </z-card>
 
@@ -22,7 +28,13 @@
       zTitle="Total Medical Plans"
       zDescription="Active medical plans in the system"
     >
-      <div class="text-4xl font-bold">{{ totalMedicalPlans }}</div>
+      <div class="text-4xl font-bold">
+        @if (isLoading()) {
+        <span class="text-muted-foreground">...</span>
+        } @else {
+        {{ totalMedicalPlans() }}
+        }
+      </div>
       <button z-button class="w-full mt-4" routerLink="/medical-plans">View Medical Plans</button>
     </z-card>
   </div>

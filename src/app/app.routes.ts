@@ -20,6 +20,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./medical-plans/medical-plans.component').then((m) => m.MedicalPlansComponent),
       },
+      {
+        path: 'medical-plans/:id',
+        loadComponent: () =>
+          import('./medical-plans/medical-plan-detail/medical-plan-detail.component').then(
+            (m) => m.MedicalPlanDetailComponent
+          ),
+      },
     ],
   },
 ];

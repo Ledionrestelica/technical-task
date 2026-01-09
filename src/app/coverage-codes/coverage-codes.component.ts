@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ZardTableComponent } from '../shared/components/table/table.component';
 import { LocalStorageService } from '../shared/services/local-storage.service';
 import { CoverageCode } from '@/shared/models/coverage-code.model';
+import { MedicalPlan, MedicalPlanDetail } from '@/shared/models/medical-plan.model';
 import { EditCoverageCodeDialogComponent } from '../edit-coverage-code/edit-coverage-code';
 import { signal } from '@angular/core';
 import {
@@ -44,8 +45,15 @@ export class CoverageCodesComponent {
   }
 
   async deleteCoverageCode(id: string): Promise<void> {
+    const isUsedByMedicalPlan = await this.checkIfUsedByMedicalPlan(id);
+
+    if (isUsedByMedicalPlan) {
+      toast.error('Cannot delete coverage code. It is used by one or more medical plans.');
+      return;
+    }
+
     this.deletingId.set(id);
-    const response = await this.localStorageService.deleteItem('coverage_codes', id);
+    const response = await this.localStorageService.deleteItem<CoverageCode>('coverage_codes', id);
     if (response.status === 'success') {
       toast.success(response.message);
       this.coverageCodes.update((prev) => prev.filter((code) => code.id !== id));
@@ -56,6 +64,25 @@ export class CoverageCodesComponent {
     }
   }
 
+  private async checkIfUsedByMedicalPlan(coverageCodeId: string): Promise<boolean> {
+    try {
+      const response = await this.localStorageService.getItem<MedicalPlan>('medical_plans');
+      if (response.status === 'success' && response.data) {
+        return response.data.some((plan) => {
+          const planDetail = plan as MedicalPlanDetail;
+          const coverageRates = planDetail.coverageRates || (plan as any).coverageRates || [];
+          return coverageRates.some(
+            (rate: { coverageCodeId: string }) => rate.coverageCodeId === coverageCodeId
+          );
+        });
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking coverage code usage', error);
+      return false;
+    }
+  }
+
   isDeleting(id: string): boolean {
     return this.deletingId() === id;
   }
@@ -63,7 +90,7 @@ export class CoverageCodesComponent {
   async loadCoverageCodes(): Promise<void> {
     this.isLoading.set(true);
     try {
-      const response = await this.localStorageService.getItem('coverage_codes');
+      const response = await this.localStorageService.getItem<CoverageCode>('coverage_codes');
       if (response.status === 'success') {
         this.coverageCodes.set(response.data ?? []);
       } else {

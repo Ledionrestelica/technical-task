@@ -4,6 +4,7 @@ import {
   OnInit,
   inject,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Output,
   EventEmitter,
 } from '@angular/core';
@@ -19,34 +20,47 @@ import { isInvalid, hasError } from '@/shared/utils/helpers';
 
 import { ZardInputDirective } from '@/shared/components/input/input.directive';
 import { Z_MODAL_DATA, ZardDialogService } from '@/shared/components/dialog/dialog.service';
-import { CoverageCode } from '@/shared/models/coverage-code.model';
 import { ZardCheckboxComponent } from '@/shared/components/checkbox/checkbox.component';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { toast } from 'ngx-sonner';
 import { ZardButtonComponent } from '@/shared/components/button/button.component';
+import { CoverageSummary, MedicalPlan } from '@/shared/models/medical-plan.model';
 
 @Component({
-  selector: 'app-add-coverage-code',
+  selector: 'app-add-medical-plan',
   imports: [ZardInputDirective, ZardCheckboxComponent, FormsModule, ReactiveFormsModule],
-  templateUrl: './add-coverage-code.html',
-  styleUrl: './add-coverage-code.css',
+  templateUrl: './add-medical-plan.html',
+  styleUrl: './add-medical-plan.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class AddCoverageCode implements OnInit {
-  private zData: CoverageCode | null = inject(Z_MODAL_DATA, { optional: true }) ?? null;
+export class AddMedicalPlan implements OnInit {
+  private zData: MedicalPlan | null = inject(Z_MODAL_DATA, { optional: true }) ?? null;
+  private cdr = inject(ChangeDetectorRef);
+
+  readonly coverageSummaryOptions: CoverageSummary[] = [
+    'Major Medical',
+    'Hospitalization',
+    'Prescription',
+    'Dental',
+    'Vision',
+    'Other',
+    'Waiver Plan',
+    'Self Insured',
+  ];
 
   form = new FormGroup({
-    code: new FormControl('', [
+    planCode: new FormControl('', [
       Validators.required,
       Validators.minLength(1),
       Validators.maxLength(4),
     ]),
-    description: new FormControl('', [
+    planName: new FormControl('', [
       Validators.required,
       Validators.minLength(1),
       Validators.maxLength(30),
     ]),
+    coverageSummary: new FormControl<MedicalPlan['coverageSummary']>([]),
     active: new FormControl(false),
   });
 
@@ -65,11 +79,14 @@ export class AddCoverageCode implements OnInit {
   ngOnInit(): void {
     if (this.zData) {
       this.form.patchValue({
-        code: this.zData.code,
-        description: this.zData.description,
+        planCode: this.zData.code,
+        planName: this.zData.name,
+        coverageSummary: this.zData.coverageSummary,
         active: this.zData.active,
       });
     }
+
+    this.cdr.detectChanges();
   }
 
   isInvalid(controlName: string): boolean {
@@ -79,18 +96,64 @@ export class AddCoverageCode implements OnInit {
   hasError(controlName: string, errorType: string): boolean {
     return hasError(this.form, controlName, errorType);
   }
+
+  isCoverageSelected(option: string): boolean {
+    const currentValue = this.form.get('coverageSummary')?.value || [];
+    return currentValue.includes(option as CoverageSummary);
+  }
+
+  isCoverageDisabled(option: string): boolean {
+    const currentValue = this.form.get('coverageSummary')?.value || [];
+    const hasWaiverPlan = currentValue.includes('Waiver Plan' as CoverageSummary);
+    const isWaiverPlan = option === 'Waiver Plan';
+    const hasOtherOptions = currentValue.some((item: CoverageSummary) => item !== 'Waiver Plan');
+
+    if (hasWaiverPlan && !isWaiverPlan) {
+      return true;
+    }
+
+    if (hasOtherOptions && isWaiverPlan) {
+      return true;
+    }
+
+    return false;
+  }
+
+  onCoverageChange(option: string, event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const currentValue = this.form.get('coverageSummary')?.value || [];
+    let newValue: MedicalPlan['coverageSummary'];
+
+    if (checkbox.checked) {
+      if (option === 'Waiver Plan') {
+        newValue = ['Waiver Plan'] as CoverageSummary[];
+      } else {
+        newValue = [
+          ...currentValue.filter((item: CoverageSummary) => item !== 'Waiver Plan'),
+          option as CoverageSummary,
+        ];
+      }
+    } else {
+      newValue = currentValue.filter(
+        (item: CoverageSummary) => item !== (option as CoverageSummary)
+      );
+    }
+
+    this.form.patchValue({ coverageSummary: newValue });
+    this.cdr.detectChanges();
+  }
 }
 
 @Component({
-  selector: 'app-add-coverage-code-dialog',
+  selector: 'app-add-medical-plan-dialog',
   imports: [ZardButtonComponent],
   template: `
-    <button type="button" z-button zType="outline" (click)="openDialog()">Add Coverage Code</button>
+    <button type="button" z-button zType="outline" (click)="openDialog()">Add Medical Plan</button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class AddCoverageCodeDialogComponent {
+export class AddMedicalPlanDialogComponent {
   private dialogService = inject(ZardDialogService);
   private localStorageService = inject(LocalStorageService);
 
@@ -100,16 +163,16 @@ export class AddCoverageCodeDialogComponent {
 
   openDialog() {
     this.dialogService.create({
-      zTitle: 'Add Coverage Code',
-      zDescription: `Add a new coverage code to the system.`,
-      zContent: AddCoverageCode,
+      zTitle: 'Add Medical Plan',
+      zDescription: `Add a new medical plan to the system.`,
+      zContent: AddMedicalPlan,
       zData: {
         code: '',
-        description: '',
+        name: '',
         active: true,
-      } as CoverageCode,
+      } as MedicalPlan,
       zOkText: 'Save changes',
-      zOnOk: async (instance: AddCoverageCode) => {
+      zOnOk: async (instance: AddMedicalPlan) => {
         if (instance.form.invalid) {
           instance.form.markAllAsTouched();
           return false;
@@ -123,16 +186,17 @@ export class AddCoverageCodeDialogComponent {
         try {
           const formValue = instance.form.value;
 
-          const newCode: CoverageCode = {
+          const newPlan: MedicalPlan = {
             id: crypto.randomUUID(),
-            code: formValue.code ?? '',
-            description: formValue.description ?? '',
+            code: formValue.planCode ?? '',
+            name: formValue.planName ?? '',
+            coverageSummary: (formValue.coverageSummary as MedicalPlan['coverageSummary']) || [],
             active: formValue.active ?? false,
           };
 
-          const response = await this.localStorageService.setItemWithCodeCheck<CoverageCode>(
-            'coverage_codes',
-            [newCode]
+          const response = await this.localStorageService.setItemWithCodeCheck<MedicalPlan>(
+            'medical_plans',
+            [newPlan]
           );
 
           if (response.status === 'success') {
@@ -150,7 +214,7 @@ export class AddCoverageCodeDialogComponent {
         }
       },
       zWidth: '425px',
-      zOkDisabled: (instance: AddCoverageCode) => {
+      zOkDisabled: (instance: AddMedicalPlan) => {
         return this.isSaving() || instance.formInvalid();
       },
       zOnCancel: () => {

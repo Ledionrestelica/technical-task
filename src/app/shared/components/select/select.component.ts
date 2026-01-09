@@ -158,7 +158,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
     }
   }
 
-  // Compute the label based on selected value
   readonly selectedLabels = computed<string[]>(() => {
     const selectedValue = this.zValue();
     if (this.zMultiple() && Array.isArray(selectedValue)) {
@@ -168,13 +167,9 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
     return this.provideLabelForSingleSelectMode(selectedValue as string);
   });
 
-  private onChange: OnChangeType = (_value: string) => {
-    // ControlValueAccessor onChange callback
-  };
+  private onChange: OnChangeType = (_value: string) => {};
 
-  private onTouched: OnTouchedType = () => {
-    // ControlValueAccessor onTouched callback
-  };
+  private onTouched: OnTouchedType = () => {};
 
   protected readonly classes = computed(() => mergeClasses(selectVariants(), this.class()));
   protected readonly contentClasses = computed(() => mergeClasses(selectContentVariants()));
@@ -188,7 +183,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
 
   ngAfterContentInit() {
     const hostWidth = this.elementRef.nativeElement.offsetWidth || 0;
-    // Setup select host reference for each item
     let i = 0;
     for (const item of this.selectItems()) {
       item.setSelectHost({
@@ -289,13 +283,10 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
     this.zSelectionChange.emit(this.zValue());
 
     if (this.zMultiple()) {
-      // in multiple mode it can happen that button changes size because of selection badges,
-      // which requires overlay position to update
       this.updateOverlayPosition();
     } else {
       this.close();
 
-      // Return focus to the button after selection
       setTimeout(() => {
         this.focusButton();
       }, 0);
@@ -350,7 +341,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
       return;
     }
 
-    // Create overlay if it doesn't exist
     if (!this.overlayRef) {
       this.createOverlay();
     }
@@ -454,7 +444,7 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
   private createOverlay() {
     if (this.overlayRef) {
       return;
-    } // Already created
+    }
 
     if (isPlatformBrowser(this.platformId)) {
       try {
@@ -485,7 +475,7 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
           hasBackdrop: false,
           scrollStrategy: this.overlay.scrollStrategies.reposition(),
           width: elementWidth,
-          maxHeight: 384, // max-h-96 equivalent
+          maxHeight: 384,
         });
         this.overlayRef
           .outsidePointerEvents()
@@ -607,7 +597,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
       return;
     }
 
-    // Find the index of the currently selected item
     let selectedValue;
     if (Array.isArray(this.zValue()) && this.zValue().length) {
       [selectedValue] = this.zValue();
@@ -617,7 +606,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
 
     let selectedIndex = items.findIndex((item) => item.getAttribute('value') === selectedValue);
 
-    // If no item is selected, focus the first item
     if (selectedIndex === -1) {
       selectedIndex = 0;
     }
@@ -626,7 +614,6 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
     this.updateItemFocus(items, selectedIndex);
   }
 
-  // ControlValueAccessor implementation
   writeValue(value: string | string[] | null): void {
     if (this.zMultiple() && Array.isArray(value)) {
       this.zValue.set(value);
@@ -643,7 +630,5 @@ export class ZardSelectComponent implements ControlValueAccessor, AfterContentIn
     this.onTouched = fn;
   }
 
-  setDisabledState(): void {
-    // The disabled state is handled by the disabled input
-  }
+  setDisabledState(): void {}
 }

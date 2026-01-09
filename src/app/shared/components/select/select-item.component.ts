@@ -17,8 +17,6 @@ import {
   type ZardSelectSizeVariants,
 } from '@/shared/components/select/select.variants';
 import { mergeClasses, noopFn, transform } from '@/shared/utils/merge-classes';
-
-// Interface to avoid circular dependency
 interface SelectHost {
   selectedValue(): string[];
   selectItem(value: string, label: string): void;

@@ -2,6 +2,7 @@ import {
   Component,
   signal,
   OnInit,
+  OnDestroy,
   inject,
   ChangeDetectionStrategy,
   Output,
@@ -16,31 +17,24 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { ZardInputDirective } from '@/shared/components/input/input.directive';
-import { ZardDialogModule } from '@/shared/components/dialog/dialog.component';
 import { Z_MODAL_DATA, ZardDialogService } from '@/shared/components/dialog/dialog.service';
 import { CoverageCode } from '@/shared/models/coverage-code.model';
-import { ZardCheckboxComponent } from '@/shared/components/checkbox/checkbox.component';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { LucideAngularModule, Pencil } from 'lucide-angular';
+import { toast } from 'ngx-sonner';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-edit-coverage-code',
-  imports: [
-    ZardInputDirective,
-    ZardCheckboxComponent,
-    ZardDialogModule,
-    FormsModule,
-    ReactiveFormsModule,
-    LucideAngularModule,
-  ],
+  imports: [FormsModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './edit-coverage-code.html',
   styleUrl: './edit-coverage-code.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
-export class EditCoverageCode implements OnInit {
-  private zData: CoverageCode | null = inject(Z_MODAL_DATA);
+export class EditCoverageCode implements OnInit, OnDestroy {
+  private zData: CoverageCode | null = inject(Z_MODAL_DATA, { optional: true }) ?? null;
+  private subscriptions = new Subscription();
 
   form = new FormGroup({
     code: new FormControl('', [
@@ -56,6 +50,23 @@ export class EditCoverageCode implements OnInit {
     active: new FormControl(false),
   });
 
+  formDirty = signal(false);
+
+  private checkIfDirty(): void {
+    if (!this.zData) {
+      this.formDirty.set(this.form.dirty);
+      return;
+    }
+
+    const currentValues = this.form.value;
+    const isDirty =
+      currentValues.code !== (this.zData.code ?? '') ||
+      currentValues.description !== (this.zData.description ?? '') ||
+      currentValues.active !== (this.zData.active ?? false);
+
+    this.formDirty.set(isDirty);
+  }
+
   ngOnInit(): void {
     if (this.zData) {
       this.form.patchValue({
@@ -63,13 +74,33 @@ export class EditCoverageCode implements OnInit {
         description: this.zData.description ?? '',
         active: this.zData.active ?? false,
       });
+      this.form.markAsPristine();
     }
+
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        this.checkIfDirty();
+      })
+    );
+    this.checkIfDirty();
+  }
+
+  onCodeInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const upperValue = input.value.toUpperCase();
+    this.form.patchValue({ code: upperValue }, { emitEvent: false });
+    input.value = upperValue;
+    this.checkIfDirty();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }
 
 @Component({
   selector: 'app-edit-coverage-code-dialog',
-  imports: [ZardDialogModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   template: `
     <lucide-angular (click)="openDialog()" [img]="pencil" class="size-4 cursor-pointer" />
   `,
@@ -77,6 +108,7 @@ export class EditCoverageCode implements OnInit {
   standalone: true,
 })
 export class EditCoverageCodeDialogComponent {
+  isSaving = signal<boolean>(false);
   @Input() coverageCode!: CoverageCode;
   @Output() saved = new EventEmitter<void>();
 
@@ -101,7 +133,30 @@ export class EditCoverageCodeDialogComponent {
       },
       zOkText: 'Save changes',
       zOnOk: async (instance: EditCoverageCode) => {
-        console.log(instance.form.value);
+        this.isSaving.set(true);
+
+        try {
+          const formValue = instance.form.value;
+          const response = await this.localStorageService.updateItemWithCodeCheck<CoverageCode>(
+            'coverage_codes',
+            this.coverageCode.id,
+            formValue as CoverageCode
+          );
+
+          if (response.status === 'success') {
+            toast.success(response.message);
+            this.saved.emit();
+          } else {
+            toast.error(response.message);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          this.isSaving.set(false);
+        }
+      },
+      zOkDisabled: (instance: EditCoverageCode) => {
+        return this.isSaving() || !instance.formDirty();
       },
       zWidth: '425px',
       zOnCancel: () => {
