@@ -32,7 +32,7 @@ import { ZardButtonComponent } from '@/shared/components/button/button.component
 import { ZardCheckboxComponent } from '@/shared/components/checkbox/checkbox.component';
 import { ZardSelectComponent } from '@/shared/components/select/select.component';
 import { ZardSelectItemComponent } from '@/shared/components/select/select-item.component';
-import { LucideAngularModule, Plus, Trash } from 'lucide-angular';
+import { LucideAngularModule, Plus, Trash, Loader } from 'lucide-angular';
 
 @Component({
   selector: 'app-medical-plan-detail',
@@ -62,6 +62,7 @@ export class MedicalPlanDetailComponent {
   private readonly isFormInitialized = signal<boolean>(false);
   private readonly activeValueSignal = signal<boolean>(false);
 
+  readonly loader = Loader;
   readonly plus = Plus;
   readonly trash = Trash;
 
