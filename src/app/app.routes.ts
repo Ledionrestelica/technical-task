@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { MainLayout } from './main-layout/main-layout';
+import { MainLayout } from './main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
@@ -8,7 +8,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./home/home').then((m) => m.Home),
+        loadComponent: () => import('./home/home.component').then((m) => m.Home),
       },
       {
         path: 'coverage-codes',

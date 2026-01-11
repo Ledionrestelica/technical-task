@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ZardTableComponent } from '../shared/components/table/table.component';
 import { LocalStorageService } from '../shared/services/local-storage.service';
-import { CoverageCode } from '@/shared/models/coverage-code.model';
-import { MedicalPlan, MedicalPlanDetail } from '@/shared/models/medical-plan.model';
-import { EditCoverageCodeDialogComponent } from '../shared/components/edit-coverage-code/edit-coverage-code';
+import { CoverageCode } from '@/coverage-codes/models/coverage-code.model';
+import { MedicalPlan, MedicalPlanDetail } from '@/medical-plans/models/medical-plan.model';
+import { EditCoverageCodeDialogComponent } from './components/edit-coverage-code/edit-coverage-code';
 import { signal } from '@angular/core';
 import {
   LucideAngularModule,
@@ -13,7 +13,7 @@ import {
   Trash,
   Loader,
 } from 'lucide-angular';
-import { AddCoverageCodeDialogComponent } from '../shared/components/add-coverage-code/add-coverage-code';
+import { AddCoverageCodeDialogComponent } from './components/add-coverage-code/add-coverage-code';
 import { toast } from 'ngx-sonner';
 
 @Component({

@@ -3,8 +3,8 @@ import { ZardCardComponent } from '../shared/components/card/card.component';
 import { ZardButtonComponent } from '@/shared/components/button/button.component';
 import { RouterLink } from '@angular/router';
 import { LocalStorageService } from '../shared/services/local-storage.service';
-import { CoverageCode } from '../shared/models/coverage-code.model';
-import { MedicalPlan } from '../shared/models/medical-plan.model';
+import { CoverageCode } from '../coverage-codes/models/coverage-code.model';
+import { MedicalPlan } from '../medical-plans/models/medical-plan.model';
 
 @Component({
   selector: 'app-home',

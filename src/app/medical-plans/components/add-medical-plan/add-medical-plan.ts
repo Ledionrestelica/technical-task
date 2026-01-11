@@ -24,7 +24,7 @@ import { ZardCheckboxComponent } from '@/shared/components/checkbox/checkbox.com
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { toast } from 'ngx-sonner';
 import { ZardButtonComponent } from '@/shared/components/button/button.component';
-import { CoverageSummary, MedicalPlan } from '@/shared/models/medical-plan.model';
+import { CoverageSummary, MedicalPlan } from '@/medical-plans/models/medical-plan.model';
 
 @Component({
   selector: 'app-add-medical-plan',
@@ -196,7 +196,7 @@ export class AddMedicalPlanDialogComponent {
 
           const response = await this.localStorageService.setItemWithCodeCheck<MedicalPlan>(
             'medical_plans',
-            [newPlan]
+            newPlan
           );
 
           if (response.status === 'success') {

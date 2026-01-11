@@ -18,7 +18,7 @@ import {
 } from '@angular/forms';
 
 import { Z_MODAL_DATA, ZardDialogService } from '@/shared/components/dialog/dialog.service';
-import { CoverageCode } from '@/shared/models/coverage-code.model';
+import { CoverageCode } from '@/coverage-codes/models/coverage-code.model';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { LucideAngularModule, Pencil } from 'lucide-angular';
 import { toast } from 'ngx-sonner';

@@ -40,19 +40,27 @@ export class LocalStorageService {
 
   setItemWithCodeCheck<T extends { code: string }>(
     key: string,
-    value: T[]
+    value: T | T[]
   ): Promise<ApiResponse<T[]>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const existingData: T[] = JSON.parse(localStorage.getItem(key) ?? '[]');
-        if (existingData.some((item) => item.code === value[0].code)) {
+        const itemsToAdd = Array.isArray(value) ? value : [value];
+
+        // Check if any of the items to add have duplicate codes
+        const duplicateCode = itemsToAdd.find((item) =>
+          existingData.some((existing) => existing.code === item.code)
+        );
+
+        if (duplicateCode) {
           return resolve({
             status: 'error',
             data: [],
             message: 'Item with this code already exists',
           });
         }
-        const updatedData = [...existingData, ...value];
+
+        const updatedData = [...existingData, ...itemsToAdd];
         localStorage.setItem(key, JSON.stringify(updatedData));
         resolve({
           status: 'success',

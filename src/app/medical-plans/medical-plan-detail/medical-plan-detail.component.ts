@@ -15,8 +15,8 @@ import {
   CoverageConfiguration,
   CoverageRate,
   PlanContribution,
-} from '@/shared/models/medical-plan.model';
-import { CoverageCode } from '@/shared/models/coverage-code.model';
+} from '@/medical-plans/models/medical-plan.model';
+import { CoverageCode } from '@/coverage-codes/models/coverage-code.model';
 import { toast } from 'ngx-sonner';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -114,7 +114,6 @@ export class MedicalPlanDetailComponent {
     });
 
     this.loadCoverageCodes();
-    this.initializeCoverageConfiguration();
     this.setupFormDisabling();
   }
 
@@ -125,17 +124,6 @@ export class MedicalPlanDetailComponent {
         return;
       }
       this.setFormDisabledState(isActive ?? false);
-    });
-  }
-
-  private initializeCoverageConfiguration(): void {
-    this.coverageSummaryOptions.forEach((type) => {
-      const configGroup = new FormGroup({
-        type: new FormControl<CoverageSummary>(type),
-        employee: new FormControl<boolean>(false),
-        dependent: new FormControl<boolean>(false),
-      });
-      this.coverageConfigurationFormArray.push(configGroup);
     });
   }
 
@@ -366,14 +354,23 @@ export class MedicalPlanDetailComponent {
   }
 
   private buildCoverageConfiguration(plan: MedicalPlan): CoverageConfiguration[] {
-    if ((plan as any).coverageConfiguration) {
-      return (plan as any).coverageConfiguration;
+    if ((plan as any).coverageConfiguration && Array.isArray((plan as any).coverageConfiguration)) {
+      const savedConfig = (plan as any).coverageConfiguration;
+      return this.coverageSummaryOptions.map((type) => {
+        const existing = savedConfig.find((config: CoverageConfiguration) => config?.type === type);
+        return {
+          type,
+          employee: existing?.employee === true ? true : false,
+          dependent: existing?.dependent === true ? true : false,
+        };
+      });
     }
 
+    const coverageSummary = Array.isArray(plan.coverageSummary) ? plan.coverageSummary : [];
     return this.coverageSummaryOptions.map((type) => ({
       type,
-      employee: plan.coverageSummary.includes(type),
-      dependent: plan.coverageSummary.includes(type),
+      employee: coverageSummary.includes(type),
+      dependent: coverageSummary.includes(type),
     }));
   }
 
@@ -393,8 +390,8 @@ export class MedicalPlanDetailComponent {
       const existing = configurations.find((config) => config.type === type);
       const configGroup = new FormGroup({
         type: new FormControl<CoverageSummary>(type),
-        employee: new FormControl<boolean>(existing?.employee || false),
-        dependent: new FormControl<boolean>(existing?.dependent || false),
+        employee: new FormControl<boolean>(existing?.employee === true),
+        dependent: new FormControl<boolean>(existing?.dependent === true),
       });
       this.coverageConfigurationFormArray.push(configGroup);
     });
@@ -450,17 +447,6 @@ export class MedicalPlanDetailComponent {
     }
   }
 
-  validateCoverageConfiguration(): boolean {
-    const configs = this.coverageConfigurationFormArray.value as CoverageConfiguration[];
-    const hasSelection = configs.some((config) => config.employee || config.dependent);
-    if (!hasSelection) {
-      this.form.get('coverageConfiguration')?.setErrors({ required: true });
-      return false;
-    }
-    this.form.get('coverageConfiguration')?.setErrors(null);
-    return true;
-  }
-
   async save(): Promise<void> {
     if (!this.isFormValid()) {
       return;
@@ -491,14 +477,6 @@ export class MedicalPlanDetailComponent {
   private isFormValid(): boolean {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      if (!this.validateCoverageConfiguration()) {
-        toast.error('Please select at least one coverage option');
-      }
-      return false;
-    }
-
-    if (!this.validateCoverageConfiguration()) {
-      toast.error('Please select at least one coverage option');
       return false;
     }
 
