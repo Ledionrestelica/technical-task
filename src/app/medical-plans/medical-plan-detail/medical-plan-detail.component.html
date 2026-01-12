@@ -76,42 +76,39 @@
       </div>
       <div class="space-y-4">
         <h3 class="text-base font-semibold">Coverage Configuration</h3>
-        <div class="border rounded-md p-4">
-          <div class="grid grid-cols-3 gap-4 mb-3 pb-2 border-b">
-            <div class="font-medium text-sm">Coverage Type</div>
-            <div class="font-medium text-sm text-center">Employee</div>
-            <div class="font-medium text-sm text-center">Dependent</div>
-          </div>
-          <div class="space-y-3">
-            @for ( config of coverageConfigurationFormArray.controls; track $index; let index =
-            $index ) { @let type = getCoverageConfigType(index);
-            <div
-              class="grid grid-cols-3 gap-4 items-center"
-              [class.opacity-50]="isCoverageConfigDisabled(type)"
-            >
-              <div class="text-sm">{{ type }}</div>
-              <div class="flex justify-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for ( config of coverageConfigurationFormArray.controls; track $index; let index =
+          $index ) { @let type = getCoverageConfigType(index);
+          <div
+            class="border rounded-lg p-4 bg-card hover:bg-accent/50 transition-colors"
+            [class.opacity-50]="isCoverageConfigDisabled(type)"
+          >
+            <div class="font-medium text-sm mb-4 text-foreground">{{ type }}</div>
+            <div class="space-y-3">
+              <label class="flex items-center gap-3 cursor-pointer" [class.cursor-not-allowed]="isCoverageConfigDisabled(type) || isFormDisabled()">
                 <z-checkbox
                   [formControl]="getEmployeeControl(index)"
                   [disabled]="isCoverageConfigDisabled(type) || isFormDisabled()"
                 ></z-checkbox>
-              </div>
-              <div class="flex justify-center">
+                <span class="text-sm text-muted-foreground">Employee</span>
+              </label>
+              <label class="flex items-center gap-3 cursor-pointer" [class.cursor-not-allowed]="isCoverageConfigDisabled(type) || isFormDisabled()">
                 <z-checkbox
                   [formControl]="getDependentControl(index)"
                   [disabled]="isCoverageConfigDisabled(type) || isFormDisabled()"
                 ></z-checkbox>
-              </div>
+                <span class="text-sm text-muted-foreground">Dependent</span>
+              </label>
             </div>
-            }
           </div>
-          @if ( form.get('coverageConfiguration')?.invalid &&
-          form.get('coverageConfiguration')?.touched ) {
-          <span class="text-xs text-red-500 mt-2 block"
-            >Please select at least one coverage option</span
-          >
           }
         </div>
+        @if ( form.get('coverageConfiguration')?.invalid &&
+        form.get('coverageConfiguration')?.touched ) {
+        <span class="text-xs text-red-500 block"
+          >Please select at least one coverage option</span
+        >
+        }
         @if (hasSelfInsured()) {
         <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded">
           Note: Self Insured coverage affects contribution calculations
