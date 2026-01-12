@@ -107,9 +107,9 @@ export class MedicalPlansComponent {
         return false;
       }
 
-      const planDetail = plan as MedicalPlanDetail;
       const coverageConfiguration =
-        planDetail.coverageConfiguration || (plan as any).coverageConfiguration;
+        (plan as MedicalPlanDetail).coverageConfiguration ||
+        (plan as MedicalPlanDetail).coverageConfiguration;
 
       if (!coverageConfiguration || !Array.isArray(coverageConfiguration)) {
         return false;

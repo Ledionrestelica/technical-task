@@ -349,14 +349,17 @@ export class MedicalPlanDetailComponent {
     return {
       ...plan,
       coverageConfiguration,
-      coverageRates: (plan as any).coverageRates || [],
-      planContribution: (plan as any).planContribution || 'None',
+      coverageRates: (plan as MedicalPlanDetail).coverageRates || [],
+      planContribution: (plan as MedicalPlanDetail).planContribution || 'None',
     };
   }
 
   private buildCoverageConfiguration(plan: MedicalPlan): CoverageConfiguration[] {
-    if ((plan as any).coverageConfiguration && Array.isArray((plan as any).coverageConfiguration)) {
-      const savedConfig = (plan as any).coverageConfiguration;
+    if (
+      (plan as MedicalPlanDetail).coverageConfiguration &&
+      Array.isArray((plan as MedicalPlanDetail).coverageConfiguration)
+    ) {
+      const savedConfig = (plan as MedicalPlanDetail).coverageConfiguration;
       return this.coverageSummaryOptions.map((type) => {
         const existing = savedConfig.find((config: CoverageConfiguration) => config?.type === type);
         return {

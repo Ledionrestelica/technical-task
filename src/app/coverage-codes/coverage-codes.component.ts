@@ -70,7 +70,8 @@ export class CoverageCodesComponent {
       if (response.status === 'success' && response.data) {
         return response.data.some((plan) => {
           const planDetail = plan as MedicalPlanDetail;
-          const coverageRates = planDetail.coverageRates || (plan as any).coverageRates || [];
+          const coverageRates =
+            planDetail.coverageRates || (plan as MedicalPlanDetail).coverageRates || [];
           return coverageRates.some(
             (rate: { coverageCodeId: string }) => rate.coverageCodeId === coverageCodeId
           );
